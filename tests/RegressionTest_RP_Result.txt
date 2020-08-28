@@ -1,0 +1,67 @@
+08/27/20 20:39:18: canomate v0.01 - Automation Utility for Canon cameras (uses Canon Control API via WiFi)
+08/27/20 20:39:18: Copyright (c) Horshack, System Time: 08/27/20 20:39:18, Py: 3.8.0, OS: Windows
+
+08/27/20 20:39:18: PrintMessageToLog: Canomate regression test - Canon RP
+08/27/20 20:39:18: PrintMessageToLog: Part 1 - Information Operations
+08/27/20 20:39:18: PrintCameraInfo: Model: Canon EOS RP, S/N: XXXXXXXXXXXX, Firmware: 1.5.0, Camera Date/Time: Thu, 27 Aug 2020 20:39:20 -0800
+08/27/20 20:39:18: PrintShootingSettings: Mode: m, Aperture: f8.0, SS: 1/250, ISO: 400, EC: 
+08/27/20 20:39:18: PrintShootingModeDial: m
+08/27/20 20:39:18: PrintLensInfo: RF24-105mm F4 L IS USM
+08/27/20 20:39:18: PrintBatteryInfo: Name: LP-E17, Kind: battery, Level: full, Quality: good
+08/27/20 20:39:18: PrintTemperatureStatus: normal
+08/27/20 20:39:18: PrintMessageToLog: Part 2 - Exposure Operations
+08/27/20 20:39:18: PrintMessageToLog: Make sure mode dial is set to Av
+08/27/20 20:39:18: WaitForEnterKeyToContinue: Press <Enter> to continue...
+08/27/20 20:39:21: AssertCameraSettings: Conditions met
+08/27/20 20:39:21: PrintExposureCompensation: +0.0 Available: ['-3.0', '-2_2/3', '-2_1/3', '-2.0', '-1_2/3', '-1_1/3', '-1.0', '-0_2/3', '-0_1/3', '+0.0', '+0_1/3', '+0_2/3', '+1.0', '+1_1/3', '+1_2/3', '+2.0', '+2_1/3', '+2_2/3', '+3.0']
+08/27/20 20:39:21: SetExposureCompensation: +0.0
+08/27/20 20:39:21: PrintMessageToLog: Make sure mode dial is set to M
+08/27/20 20:39:21: WaitForEnterKeyToContinue: Press <Enter> to continue...
+08/27/20 20:39:24: AssertCameraSettings: Conditions met
+08/27/20 20:39:24: PrintAperture: f8.0 Available: ['f4.0', 'f4.5', 'f5.0', 'f5.6', 'f6.3', 'f7.1', 'f8.0', 'f9.0', 'f10', 'f11', 'f13', 'f14', 'f16', 'f18', 'f20', 'f22']
+08/27/20 20:39:24: SetAperture: f8.0
+08/27/20 20:39:24: PrintShutterSpeed: 1/250 Available: ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"', '3"2', '2"5', '2"', '1"6', '1"3', '1"', '0"8', '0"6', '0"5', '0"4', '0"3', '1/4', '1/5', '1/6', '1/8', '1/10', '1/13', '1/15', '1/20', '1/25', '1/30', '1/40', '1/50', '1/60', '1/80', '1/100', '1/125', '1/160', '1/200', '1/250', '1/320', '1/400', '1/500', '1/640', '1/800', '1/1000', '1/1250', '1/1600', '1/2000', '1/2500', '1/3200', '1/4000']
+08/27/20 20:39:24: SetShutterSpeed: 1/250
+08/27/20 20:39:24: PrintIso: 400 Available: ['auto', '100', '125', '160', '200', '250', '320', '400', '500', '640', '800', '1000', '1250', '1600', '2000', '2500', '3200', '4000', '5000', '6400', '8000', '10000', '12800', '16000', '20000', '25600', '32000', '40000']
+08/27/20 20:39:24: SetIso: 400
+08/27/20 20:39:24: PrintMeteringMode: evaluative Available: ['evaluative', 'partial', 'spot', 'center_weighted_average']
+08/27/20 20:39:24: SetMeteringMode: evaluative
+08/27/20 20:39:24: PrintMessageToLog: Part 3 - AF/Drive Operations
+08/27/20 20:39:24: PrintMessageToLog: Make sure AF is set to 'oneshot'
+08/27/20 20:39:24: WaitForEnterKeyToContinue: Press <Enter> to continue...
+08/27/20 20:39:26: AssertCameraSettings: Conditions met
+08/27/20 20:39:26: PrintAfOperation: oneshot
+08/27/20 20:39:26: PrintDriveMode: single Available: ['single', 'highspeed', 'lowspeed', 'self_10sec', 'self_2sec', 'self_continuous']
+08/27/20 20:39:26: SetDriveMode: single
+08/27/20 20:39:26: PrintAfMethod: spot Available: ['face+tracking', 'spot', '1point', 'expand_cross', 'expand_around', 'zone']
+08/27/20 20:39:26: SetAfMethod: spot
+08/27/20 20:39:26: PrintMessageToLog: Part 4 - WB/Picture Control Operations
+08/27/20 20:39:26: PrintWhiteBalance: auto Available: ['auto', 'awbwhite', 'daylight', 'shade', 'cloudy', 'tungsten', 'whitefluorescent', 'flash', 'custom', 'colortemp']
+08/27/20 20:39:26: SetWhiteBalance: auto
+08/27/20 20:39:26: PrintMessageToLog: Part 5 - Movie Operations
+08/27/20 20:39:26: GetPendingEvents: Cleared-only (not printed)
+08/27/20 20:39:26: EnterMovieMode
+08/27/20 20:39:26: PrintMovieMode: on
+08/27/20 20:39:26: SetMovieQuality: fhd_2997_ipb_light
+08/27/20 20:39:26: PrintMovieQuality: fhd_2997_ipb_light Available: ['4k_2398_ipb_standard', 'fhd_5994_ipb_standard', 'fhd_2997_ipb_standard', 'fhd_2997_ipb_light', 'fhd_2398_ipb_standard', 'hd_5994_ipb_standard', 'hd_2997_ipb_standard']
+08/27/20 20:39:26: StartMovieRecord
+08/27/20 20:39:27: Delaying for 1.00 seconds (Reason: Delay op)
+08/27/20 20:39:28: StopMovieRecord
+08/27/20 20:39:28: ExitMovieMode
+08/27/20 20:39:28: Delaying for 3.00 seconds (Reason: Delay op)
+08/27/20 20:39:31: PrintMessageToLog: Part 6 - Stills Operations
+08/27/20 20:39:31: SetStillImageQuality: Raw: none, JPEG: small2
+08/27/20 20:39:31: PrintStillImageQuality: Raw: none, JPEG: small2 Available: Raw: ['none', 'raw', 'craw'], JPEG: ['none', 'large_fine', 'large_normal', 'medium_fine', 'medium_normal', 'small1_fine', 'small1_normal', 'small2']
+08/27/20 20:39:31: TakePhoto
+08/27/20 20:39:31: Delaying for 3.00 seconds (Reason: 'delayafter' OP param)
+08/27/20 20:39:34: PrintMessageToLog: Part 7 - File Operations and RunExecutable
+08/27/20 20:39:34: WaitForNewFilesOnCamera: ['http://192.168.1.142:8080/ccapi/ver100/contents/sd/100CANON/MVI_0658.MP4', 'http://192.168.1.142:8080/ccapi/ver100/contents/sd/100CANON/IMG_0659.JPG']
+08/27/20 20:39:35: GetInfoOnNewFilesPolled: File(s):
+08/27/20 20:39:35: File #1: Name: MVI_0658.MP4 Size: 1.91 MB, Duration: 1 (s), Date: Thu, 27 Aug 2020 20:39:28 GMT
+08/27/20 20:39:35: File #2: Name: IMG_0659.JPG Size: 93.77 KB, Duration: N/A, Date: Thu, 27 Aug 2020 20:39:32 GMT
+08/27/20 20:39:35: DownloadNewFilesPolled: File(s):
+08/27/20 20:39:56: DownloadNewFilesPolled: MVI_0658.MP4 stored at .\MVI_0658.MP4 [download time = 21.54 (s)]
+08/27/20 20:39:57: DownloadNewFilesPolled: IMG_0659.JPG stored at .\IMG_0659.JPG [download time = 0.08 (s)]
+08/27/20 20:39:57: RunExecutable: exec=exiftool args=-q -m -p "${DateTimeOriginal;$_=(split(' ',$_))[1]},${FileName},${Duration#},${CameraTemperature#}" ".\MVI_0658.MP4" ".\IMG_0659.JPG"
+08/27/20 20:39:57: ExitApp: exitcode=0
+08/27/20 20:39:57: >>>> canomate session over (exit=0), logs at "C:\develop\canomate\canomate-appdata"
