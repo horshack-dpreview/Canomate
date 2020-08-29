@@ -658,7 +658,7 @@ class AutomationOp_RunExecutable(AutomationOp):
         self.fAppendLastDownloadedFilenames = self.getDictValueAsBool(paramDict, 'appendlastdownloadstoargs', False)
         self.outputFilename = self.getDictValueAsStr(paramDict, 'outputfile', "")
         self.outputFileWriteMethod = self.getDictValueStrChoice(paramDict, 'writemode', ['append', 'overwrite', 'overwrite_first_time'], 'append')
-        self.assertExitCode = self.getDictValueAsScalar(paramDict, 'assertexitcode', None, int, fRequiredValue=True)
+        self.assertExitCode = self.getDictValueAsScalar(paramDict, 'assertexitcode', None, int, fRequiredValue=False)
         return super().__init__(paramDict)        
     def execute(self):
         args = self.args
