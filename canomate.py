@@ -460,17 +460,12 @@ class AutomationOp_PrintCameraInfo(AutomationOp):
         return super().__init__(paramDict)        
     def execute(self):
         cameraInfo = ccapi.getCameraInfo(self.retryInfo)
-        dateTime = ccapi.getDateTime(self.retryInfo)
         if cameraInfo['success']:
             cameraInfoStr = "Model: {:s}, S/N: {:s}, Firmware: {:s}".format(
                 cameraInfo['productname'], cameraInfo['serialnumber'], cameraInfo['firmwareversion'])
         else:
             cameraInfoStr = "N/A"
-        if dateTime['success']:
-            dateTimeStr = ", Camera Date/Time: {:s}".format(dateTime['datetime'])
-        else:
-            dateTimeStr = ", N/A"
-        infoStr = cameraInfoStr + dateTimeStr
+        infoStr = cameraInfoStr
         applog_i("{:s}: {:s}".format(self.getClassSuffix(), infoStr))
             
 class AutomationOp_PrintTemperatureStatus(AutomationOp):
@@ -894,6 +889,14 @@ class AutomationOp_AssertCameraSettings(AutomationOp):
                 exit(ERRNO_ASSERT_CAMERA_SETTING_WRONG_VALUE)
         applog_i("{:s}: Conditions met".format(self.getClassSuffix()))
 
+class AutomationOp_PrintCameraDateTime(AutomationOp):
+    def __init__(self, paramDict):
+        return super().__init__(paramDict)
+    def execute(self):
+        resp = ccapi.getDateTime(self.retryInfo)
+        infoStr = CCAPI.convertCameraDateTimeResp(resp)
+        applog_i("{:s}: {:s}".format(self.getClassSuffix(), infoStr))
+
 class AutomationOp_SyncDateTime(AutomationOp):
 
     def __init__(self, paramDict):
@@ -902,14 +905,11 @@ class AutomationOp_SyncDateTime(AutomationOp):
     def execute(self):
         # get camera's current date/time so we can later print the before/after camera time
         resp = ccapi.getDateTime(self.retryInfo)
+        cameraCurrentDateTimeStr = CCAPI.convertCameraDateTimeResp(resp)
         # set the camera's date/time to this system's date time
         dateTimeStr = CCAPI.genCameraDateTimeStr(time.time() + self.skewSecs)
         ccapi.setDateTime(self.retryInfo, dateTimeStr, True if time.daylight else False)
         # print out what we've done
-        if resp['success']:
-            cameraCurrentDateTimeStr = "{:s}{:s}".format(resp['datetime'], " DST" if resp['dst'] else "")
-        else:
-            cameraCurrentDateTimeStr = "N/A"
         cameraNewDateTimeStr = "{:s}{:s}".format(dateTimeStr, " DST" if time.daylight else "")
         infoStr = "Changed camera time from \"{:s}\" to \"{:s}\"".format(cameraCurrentDateTimeStr, cameraNewDateTimeStr)
         applog_i("{:s}: {:s}".format(self.getClassSuffix(), infoStr))
@@ -954,7 +954,8 @@ AutomationOpClasses = [
     AutomationOp_PrintDriveMode, AutomationOp_SetDriveMode, AutomationOp_PrintAfMethod, AutomationOp_SetAfMethod,
     AutomationOp_PrintMeteringMode, AutomationOp_SetMeteringMode, AutomationOp_PrintStillImageQuality, AutomationOp_SetStillImageQuality,
     AutomationOp_PrintLensInfo, AutomationOp_WaitForEnterKeyToContinue, AutomationOp_Beep, AutomationOp_AssertCameraSettings,
-    AutomationOp_PrintMovieMode, AutomationOp_PrintAfOperation, AutomationOp_GetPendingEvents, AutomationOp_SyncDateTime
+    AutomationOp_PrintMovieMode, AutomationOp_PrintAfOperation, AutomationOp_GetPendingEvents, AutomationOp_SyncDateTime,
+    AutomationOp_PrintCameraDateTime
 ]    
         
                 
@@ -1031,6 +1032,17 @@ class CCAPI:
             timeZoneStr = "{:05d}".format(int(timeZoneStr) - 100)
         return timeStr + " " + timeZoneStr
 
+    #
+    # Converts the camera's response from CCAPI /functions/datetime to a date/time string
+    # @param timeEpoch Time value to convert
+    # @return String containing date+time in Canon format
+    #
+    @staticmethod
+    def convertCameraDateTimeResp(resp):
+        if resp['success']:
+            return "{:s}{:s}".format(resp['datetime'], " DST" if resp['dst'] else "")
+        else:
+            return "N/A"
 
     def genFullUrl(self, relativeUrl, verPrefix='ver100'):
         # example: http://192.168.1.142:8080/ccapi/ver100/devicestatus/temperature
