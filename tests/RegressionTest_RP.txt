@@ -8,6 +8,7 @@ PrintMessageToLog message="Canomate regression test - Canon RP"
 #
 PrintMessageToLog message="Part 1 - Information Operations"
 PrintCameraInfo
+PrintCameraDateTime
 PrintShootingSettings
 PrintShootingModeDial
 PrintLensInfo
