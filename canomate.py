@@ -39,7 +39,7 @@ import traceback
 #
 
 APP_NAME                                    = "canomate"
-APP_VERSION                                 = "0.01"
+APP_VERSION                                 = "0.02"
 
 # default values
 DEFAULT_CCAPI_HTTP_PORT                     = 8080
