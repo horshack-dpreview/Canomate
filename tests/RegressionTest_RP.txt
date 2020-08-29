@@ -15,9 +15,16 @@ PrintBatteryInfo
 PrintTemperatureStatus
 
 #
+# Do misc/utility operations
+#
+PrintMessageToLog message="Part 2 - Misc. / Utility Operations"
+SyncDateTime skewsecs=0.7
+GetInfoByUrl url="/ccapi/ver100/devicestatus/temperature"
+
+#
 # Do exposure operations
 #
-PrintMessageToLog message="Part 2 - Exposure Operations"
+PrintMessageToLog message="Part 3 - Exposure Operations"
 
 # testing ExposureCompensation requires Av or Tv mode
 PrintMessageToLog message="Make sure mode dial is set to Av"
@@ -42,7 +49,7 @@ SetMeteringMode meteringmode="evaluative"
 #
 # Do AF/Drive mode operations
 #
-PrintMessageToLog message="Part 3 - AF/Drive Operations"
+PrintMessageToLog message="Part 4 - AF/Drive Operations"
 PrintMessageToLog message="Make sure AF is set to 'oneshot'"
 WaitForEnterKeyToContinue beep=1
 AssertCameraSettings afoperation=oneshot
@@ -55,14 +62,14 @@ SetAfMethod afmethod=spot
 #
 # Do WB/Picture operations
 #
-PrintMessageToLog message="Part 4 - WB/Picture Control Operations"
+PrintMessageToLog message="Part 5 - WB/Picture Control Operations"
 PrintWhiteBalance listavailable=1
 SetWhiteBalance whitebalance=auto
 
 #
 #  Do movie operations
 #
-PrintMessageToLog message="Part 5 - Movie Operations"
+PrintMessageToLog message="Part 6 - Movie Operations"
 # clear out any new file events since we'll be downloadig the test video/still we're about to take
 GetPendingEvents
 EnterMovieMode
@@ -80,7 +87,7 @@ Delay delaytime=3
 #
 # Do stills operations
 #
-PrintMessageToLog message="Part 6 - Stills Operations"
+PrintMessageToLog message="Part 7 - Stills Operations"
 SetStillImageQuality rawquality=none jpegquality=small2
 PrintStillImageQuality listavailable=1
 TakePhoto autofocus=no delayafter=3
@@ -88,14 +95,9 @@ TakePhoto autofocus=no delayafter=3
 #
 # Do file operations and RunExecutable
 #
-PrintMessageToLog message="Part 7 - File Operations and RunExecutable"
+PrintMessageToLog message="Part 8 - File Operations and RunExecutable"
 WaitForNewFilesOnCamera maxwaittime=5
 GetInfoOnNewFilesPolled
 DownloadNewFilesPolled
 RunExecutable executable="exiftool" appendlastdownloadstoargs=True outputfile="results.csv" writemode="overwrite_first_time" assertexitcode=0
 RunExecutableArgs=-q -m -p "${DateTimeOriginal;$_=(split(' ',$_))[1]},${FileName},${Duration#},${CameraTemperature#}"
-ExitApp
-
-#GetInfoByUrl url="/ccapi/ver100/devicestatus/temperature"
-
-
