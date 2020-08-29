@@ -894,6 +894,26 @@ class AutomationOp_AssertCameraSettings(AutomationOp):
                 exit(ERRNO_ASSERT_CAMERA_SETTING_WRONG_VALUE)
         applog_i("{:s}: Conditions met".format(self.getClassSuffix()))
 
+class AutomationOp_SyncDateTime(AutomationOp):
+
+    def __init__(self, paramDict):
+        self.skewSecs = self.getDictValueAsScalar(paramDict, 'skewsecs', 0.7, float, fRequiredValue=False)
+        return super().__init__(paramDict)
+    def execute(self):
+        # get camera's current date/time so we can later print the before/after camera time
+        resp = ccapi.getDateTime(self.retryInfo)
+        # set the camera's date/time to this system's date time
+        dateTimeStr = CCAPI.genCameraDateTimeStr(time.time() + self.skewSecs)
+        ccapi.setDateTime(self.retryInfo, dateTimeStr, True if time.daylight else False)
+        # print out what we've done
+        if resp['success']:
+            cameraCurrentDateTimeStr = "{:s}{:s}".format(resp['datetime'], " DST" if resp['dst'] else "")
+        else:
+            cameraCurrentDateTimeStr = "N/A"
+        cameraNewDateTimeStr = "{:s}{:s}".format(dateTimeStr, " DST" if time.daylight else "")
+        infoStr = "Changed camera time from \"{:s}\" to \"{:s}\"".format(cameraCurrentDateTimeStr, cameraNewDateTimeStr)
+        applog_i("{:s}: {:s}".format(self.getClassSuffix(), infoStr))
+
 class AutomationOp_Group(AutomationOp):        
 
     def __init__(self, paramDict):
@@ -934,7 +954,7 @@ AutomationOpClasses = [
     AutomationOp_PrintDriveMode, AutomationOp_SetDriveMode, AutomationOp_PrintAfMethod, AutomationOp_SetAfMethod,
     AutomationOp_PrintMeteringMode, AutomationOp_SetMeteringMode, AutomationOp_PrintStillImageQuality, AutomationOp_SetStillImageQuality,
     AutomationOp_PrintLensInfo, AutomationOp_WaitForEnterKeyToContinue, AutomationOp_Beep, AutomationOp_AssertCameraSettings,
-    AutomationOp_PrintMovieMode, AutomationOp_PrintAfOperation, AutomationOp_GetPendingEvents
+    AutomationOp_PrintMovieMode, AutomationOp_PrintAfOperation, AutomationOp_GetPendingEvents, AutomationOp_SyncDateTime
 ]    
         
                 
@@ -996,6 +1016,21 @@ class CCAPI:
         self.cmdErrorRetriesAllowed = None
         self.maxbusyretrytime = None
         # CCAPI URLs for various camera status/functions
+
+    #
+    # Converts a time value into a date/time string Canon uses for CCAPI /functions/datetime
+    # @param timeEpoch Time value to convert
+    # @return String containing date+time in Canon format
+    #
+    @staticmethod
+    def genCameraDateTimeStr(timeEpoch):
+        timeStruct = time.localtime(timeEpoch)
+        timeStr = time.strftime("%a, %d %b %Y %H:%M:%S", timeStruct) # example: Sat, 29 Aug 2020 05:14:15
+        timeZoneStr = time.strftime("%z", timeStruct) # example: -0700
+        if timeStruct.tm_isdst:
+            timeZoneStr = "{:05d}".format(int(timeZoneStr) - 100)
+        return timeStr + " " + timeZoneStr
+
 
     def genFullUrl(self, relativeUrl, verPrefix='ver100'):
         # example: http://192.168.1.142:8080/ccapi/ver100/devicestatus/temperature
@@ -1099,6 +1134,10 @@ class CCAPI:
         
     def getDateTime(self, retryInfo):
         return self.getRelative(retryInfo, '/functions/datetime')
+
+    def setDateTime(self, retryInfo, dateTimeStr, fDst):
+        dict = { 'datetime' : dateTimeStr, 'dst' : fDst }
+        return self.putRelative(retryInfo, '/functions/datetime', json.dumps(dict))
         
     def takeStillPhoto(self, retryInfo, fPerformAF=False):
         dict = { 'af' : fPerformAF }
