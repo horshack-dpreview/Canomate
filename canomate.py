@@ -1356,7 +1356,6 @@ def convertTimeStrToSeconds(timeStr, fHandleConversionExeptions=True):
 def delayWithConsoleMessage(delaySecs, delayReasonDesc=""):
     if delaySecs > 0:
         delayReasonStr = "(Reason: {:s})".format(delayReasonDesc) if delayReasonDesc != "" else ""
-        applog_i_nc("Delaying for {:.2f} seconds {:s}".format(delaySecs, delayReasonStr))
         secsRemaining = delaySecs
         while secsRemaining > 0:
             secsDelayThisIteration = min(secsRemaining, 1)
@@ -1364,6 +1363,7 @@ def delayWithConsoleMessage(delaySecs, delayReasonDesc=""):
             time.sleep(secsDelayThisIteration)
             secsRemaining -= secsDelayThisIteration 
             consoleClearLine()
+        applog_i("Delayed for {:.2f} seconds {:s}".format(delaySecs, delayReasonStr))
         
 #
 # Writes a message directly to console (stdout) without newline. This is used
