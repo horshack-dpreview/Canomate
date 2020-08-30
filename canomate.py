@@ -52,6 +52,7 @@ DEFAULT_CCAPI_RETRY_DELAY_SECS              = 0
 DEFAULT_EXIT_ON_CMD_ERR                     = "Yes"
 
 # app exit codes
+ERRNO_OK                                    = 0
 ERRNO_BAD_PYTHON_VER                        = 1
 ERRNO_CANT_OPEN_OP_FILE                     = 2
 ERRNO_CANT_READ_OP_FILE                     = 3
@@ -72,7 +73,8 @@ ERRNO_INVALID_OP_PARAM_CHOICE               = 203
 ERRNO_UNMATCHED_END_GROUP_OP                = 204
 ERRNO_UNMATCHED_GROUP_OP                    = 205
 ERRNO_CANT_CONVERT_STR_VAL_TO_TIME          = 206
-ERRNO_UNKNOWN_OP_PARAMETER                  = 207
+ERRNO_UNKNOWN_OP_PARAM                      = 207
+ERRNO_OP_PARAM_INVALID_FOR_OTHER_PARAMS     = 208
 ERRNO_CCAPI_TRANSPORT_ERROR                 = 1100
 ERRNO_CCAPI_CMD_ERROR                       = 1101
 ERRNO_HTTP_DOWNLOAD_FAILED                  = 1102
@@ -116,7 +118,7 @@ class RunExecutable:
     # @return (fExecuteSuccessful, errno) Tuple
     #
     @staticmethod
-    def execute(executableNameIncludingPath, cmdLineAsStr, outputFilename=None, outputFileWriteMethod=None, msgDuringExec=""):
+    def execute(executableNameIncludingPath, cmdLineAsStr, fWaitForCompletion = True, outputFilename=None, outputFileWriteMethod=None, msgDuringExec=""):
    
         # build list containing all command-line parameters, the first of which is the executable we'll be spanwing
         cmdLineAsStr = executableNameIncludingPath + ' ' + cmdLineAsStr
@@ -126,42 +128,55 @@ class RunExecutable:
         stdoutFilename = os.path.join(g.appDataDir, "RunExecutable_StdOut.txt")
         stderrFilename = os.path.join(g.appDataDir, "RunExecutable_StdErr.txt")
 
-        # run executable 
-        if msgDuringExec:
-            consoleWriteLine(msgDuringExec)
-        try:
-           with open(stdoutFilename, "w") as stdoutFile, open(stderrFilename, "w") as stderrFile:
-               processRunResult = subprocess.run(cmdLineArgArray, stdout=stdoutFile, stderr=stderrFile)
-        except Exception as e:            
-            applog_e("Executable launch failed ({:s})".format(str(e)))
-            return (False, ERRNO_RUN_EXECUTABLE_LAUNCH_FAILED)
-        if msgDuringExec:
-            consoleClearLine()
-
         #
-        # copy stdout and stderr out of process to caller-specified filename
+        #  run executable (wait for completion case)
         #
-        if outputFilename:
-            outputFileOpenModeStr = "w"  # assume we'll be overwriting the file
-            if outputFileWriteMethod == "overwrite_first_time":
-                # overwrite file if this is the first time we're writing to it during this app session
-                if os.path.exists(outputFilename):
-                    if os.path.getmtime(outputFilename) >= g.appStartTime:
-                        # file last modification is equal to or newer than our app start time, meaning
-                        # we've already written to it once this session. use append instead
-                        outputFileOpenModeStr = "a" 
-            elif outputFileWriteMethod == "append":
-                outputFileOpenModeStr = "a" 
-            else: assert outputFileWriteMethod == "overwrite"
+        if fWaitForCompletion:
+            if msgDuringExec:
+                consoleWriteLine(msgDuringExec)
             try:
-                with open(outputFilename, outputFileOpenModeStr) as outputFile, open(stdoutFilename, "r") as stdoutFile, open(stderrFilename, "r") as stderrFile:
-                    outputFile.write(stdoutFile.read())
-                    outputFile.write(stderrFile.read())
+               with open(stdoutFilename, "w") as stdoutFile, open(stderrFilename, "w") as stderrFile:
+                   processRunResult = subprocess.run(cmdLineArgArray, stdout=stdoutFile, stderr=stderrFile)
             except Exception as e:            
-                    applog_e("Error copying RunExecutable output to \"{:s}\" {:s}".format(outputFilename, str(e)))
+                applog_e("RunExecutable: Launch failed - \"{:s}\"".format(str(e)))
+                return (False, ERRNO_RUN_EXECUTABLE_LAUNCH_FAILED)
+            if msgDuringExec:
+                consoleClearLine()
+
+            #
+            # copy stdout and stderr out of process to caller-specified filename
+            #
+            if outputFilename:
+                outputFileOpenModeStr = "w"  # assume we'll be overwriting the file
+                if outputFileWriteMethod == "overwrite_first_time":
+                    # overwrite file if this is the first time we're writing to it during this app session
+                    if os.path.exists(outputFilename):
+                        if os.path.getmtime(outputFilename) >= g.appStartTime:
+                            # file last modification is equal to or newer than our app start time, meaning
+                            # we've already written to it once this session. use append instead
+                            outputFileOpenModeStr = "a" 
+                elif outputFileWriteMethod == "append":
+                    outputFileOpenModeStr = "a" 
+                else: assert outputFileWriteMethod == "overwrite"
+                try:
+                    with open(outputFilename, outputFileOpenModeStr) as outputFile, open(stdoutFilename, "r") as stdoutFile, open(stderrFilename, "r") as stderrFile:
+                        outputFile.write(stdoutFile.read())
+                        outputFile.write(stderrFile.read())
+                except Exception as e:            
+                    applog_e("RunExecutable: Error copying RunExecutable output to \"{:s}\" {:s}".format(outputFilename, str(e)))
                     return (False, ERRNO_RUN_EXECUTABLE_OUTPUT_COPY_FAILED)
 
-        return (True, processRunResult.returncode)
+            return (True, processRunResult.returncode)
+
+        #
+        # run executable (don't wait for completion)
+        #
+        try:
+            process = subprocess.Popen(cmdLineArgArray)
+        except Exception as e:
+            applog_e("RunExecutable: Launch failed - \"{:s}\"".format(str(e)))
+            return (False, ERRNO_RUN_EXECUTABLE_LAUNCH_FAILED)
+        return (True, ERRNO_OK)
         
 #
 # base class for automation operations. Each derived class corresponds to a user-specified automation
@@ -651,6 +666,14 @@ class AutomationOp_RunExecutable(AutomationOp):
         self.executable = self.getDictValueAsStr(paramDict, 'executable', None, fRequiredValue=True)
         self.args = self.getDictValueAsStr(paramDict, 'args', None, fRequiredValue=True) # required, even if blank
         self.fAppendLastDownloadedFilenames = self.getDictValueAsBool(paramDict, 'appendlastdownloadstoargs', False)
+        self.fExitOnLaunchErr = self.getDictValueAsBool(paramDict, 'exitonlauncherr', True)
+        self.fWaitForCompletion = self.getDictValueAsBool(paramDict, 'waitforcompletion', True)
+        # following options are only valid when waiting for completion. we still call getDictXXX since we pass default values for them to RunExecutable.execute()
+        if not self.fWaitForCompletion:
+            if 'outputfile' in paramDict or 'writemode' in paramDict or 'assertexitcode' in paramDict:
+                applog_i("{:s}: outputfile/writemode/assertexitcode not valid when 'waitforcompletion' is false".format(self.getClassSuffix()))
+                # don't exit, so that the line # of the above can be reported before we exit due to unusedparams
+                return super().__init__(paramDict)        
         self.outputFilename = self.getDictValueAsStr(paramDict, 'outputfile', "")
         self.outputFileWriteMethod = self.getDictValueStrChoice(paramDict, 'writemode', ['append', 'overwrite', 'overwrite_first_time'], 'append')
         self.assertExitCode = self.getDictValueAsScalar(paramDict, 'assertexitcode', None, int, fRequiredValue=False)
@@ -661,14 +684,14 @@ class AutomationOp_RunExecutable(AutomationOp):
             filenameArgsList = ['"{:s}"'.format(x) for x in AutomationOp.lastDownloadedFiles_LocalPath] # build list with each filename in quotes (in case there are spaces in filename)
             filenameArgsStr = " ".join(filenameArgsList) # convert list to a single string, with a space between each quoted filename
             args += ' ' + filenameArgsStr
-        applog_i("{:s}: exec={:s} args={:s}".format(self.getClassSuffix(), self.executable, args))
-        (fExecuteSuccessful, _errno) = RunExecutable.execute(self.executable, args, self.outputFilename, self.outputFileWriteMethod, "Running: {:s}".format(self.executable))
-        if not fExecuteSuccessful:
-            applog_e("{:s}: Execution or post-processing of results failed - errno={:d}".format(self.getClassSuffix(), _errno))
-            exit(ERRNO_RUN_EXECUTABLE_FAILED)
-        if self.assertExitCode != None and _errno != self.assertExitCode:
-            applog_i("{:s}: Terminating due exit code of {:d} not matching 'assertExitCode' value of {:d}".format(self.getClassSuffix(), _errno, self.assertExitCode))
-            exit(ERRNO_RUN_EXECUTABLE_EXIT_MISMATCH_RET_CODE)
+        applog_i("{:s}: exec={:s} args={:s} [{:s}]".format(self.getClassSuffix(), self.executable, args, ['NO_WAIT', 'WAIT'][self.fWaitForCompletion]))
+        (fExecuteSuccessful, _errno) = RunExecutable.execute(self.executable, args, self.fWaitForCompletion, self.outputFilename, self.outputFileWriteMethod, "Running: {:s}".format(self.executable))
+        if self.fExitOnLaunchErr and fExecuteSuccessful == False:
+            exit(_errno)
+        if self.fWaitForCompletion:
+            if self.assertExitCode != None and _errno != self.assertExitCode:
+                applog_i("{:s}: Terminating due exit code of {:d} not matching 'assertExitCode' value of {:d}".format(self.getClassSuffix(), _errno, self.assertExitCode))
+                exit(ERRNO_RUN_EXECUTABLE_EXIT_MISMATCH_RET_CODE)
     
 class AutomationOp_PrintMessageToLog(AutomationOp):
     def __init__(self, paramDict):
@@ -1575,7 +1598,7 @@ def processOpStrList(lines):
             unusedParamDictKeys = opInst.getUnusedParamDictKeys()
             if unusedParamDictKeys:
                 applog_e("\"{:s}\" operation on line {:d} has the following unsupported parameters: {}".format(opName, lineIndex+1, unusedParamDictKeys))
-                exit(ERRNO_UNKNOWN_OP_PARAMETER)
+                exit(ERRNO_UNKNOWN_OP_PARAM)
             
             # insert operation instance into current group
             groupInst.appendOp(opInst)
