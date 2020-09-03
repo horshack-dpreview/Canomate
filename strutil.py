@@ -19,7 +19,7 @@ import time
 # returns a date/time string in mm/dd/yy hh:mm:ss format for specified
 # epoch time - if epoch time is None then returns date/time string for
 # current time
-#   
+#
 def getDateTimeStr(timeEpoch=None, fMilitaryTime=True):
     if timeEpoch == None:
         timeEpoch = time.time()
@@ -29,7 +29,7 @@ def getDateTimeStr(timeEpoch=None, fMilitaryTime=True):
     else:
         timeStr = time.strftime("%m/%d/%y %H:%M:%S", timeStruct)
     return timeStr
-    
+
 
 #
 # Generates string containing hex dump of a bytearray. Format is:
@@ -58,7 +58,7 @@ def hexdump(data, bytesPerField=1, includeASCII=1):
         raise AssertionError("hexdump: size of data (0x{:04x}) is not a multiple of bytesPerField ({:d})".format(len(data), bytesPerField))
     for offset in xrange(0,len(data),bytesPerField):
         offsetThisFieldInLine = (offset % 16)   # byte offset into data for this field of current line
-        endingOffsetThisFieldInLine = offsetThisFieldInLine + bytesPerField     
+        endingOffsetThisFieldInLine = offsetThisFieldInLine + bytesPerField
         if (offsetThisFieldInLine == 0):
             strHexDump += "{:04x}: ".format(offset)
         (thisField,) = struct.unpack(bytesPerFieldToUnpackStr[bytesPerField], data[offset:offset+bytesPerField])
@@ -77,7 +77,7 @@ def hexdump(data, bytesPerField=1, includeASCII=1):
                     # values before start ASCII dump seciton
                     fieldsNotPrintedInFinalLine = (16-endingOffsetThisFieldInLine) * bytesPerField
                     charactersPerFieldIncludingSpace = bytesPerField*2 + 1
-                    strHexDump += " " * (fieldsNotPrintedInFinalLine*charactersPerFieldIncludingSpace) # add spaces for each missing field              
+                    strHexDump += " " * (fieldsNotPrintedInFinalLine*charactersPerFieldIncludingSpace) # add spaces for each missing field
                     if (endingOffsetThisFieldInLine < 8):
                         strHexDump += "  "                              # add spaces for missing middle separator
                 for asciiOffset in range(offsetThisFieldInLine+1):
@@ -91,4 +91,4 @@ def hexdump(data, bytesPerField=1, includeASCII=1):
             if not bIsFinalLine:    # don't put newline after final line
                 strHexDump += "\n"
     return strHexDump
-        
+

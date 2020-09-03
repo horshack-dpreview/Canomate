@@ -29,7 +29,7 @@ APPLOGF_DONT_WRITE_TO_CONSOLE   = (0x00000001<<8)
 
 #
 # global variables
-# 
+#
 gFileSessionLog = None
 gFileLifetimeLog = None
 gLoggingFlags = 0
@@ -53,17 +53,17 @@ def applog_init(loggingFlags=APPLOGF_LEVEL_INFORMATIONAL | APPLOGF_LEVEL_ERROR, 
             print("Unable to open/create logfile \"{:s}\". {:s}".format(lifetimeLogFilename, str(e)))
             return e.errno
     return 0
-    
+
 #
 # set new logging flags
-#   
+#
 def applog_set_loggingFlags(newLoggingFlags):
     global gLoggingFlags
-    gLoggingFlags = newLoggingFlags 
-    
+    gLoggingFlags = newLoggingFlags
+
 #
 # shutdown this module
-#   
+#
 def applog_shutdown():
     try:
         if gFileSessionLog:
@@ -72,7 +72,7 @@ def applog_shutdown():
             gFileSessionLog.close()
     except IOError as e:
         print("Unable to close logfile. {:s}".format(str(e)))
- 
+
  #
  # Log message with specified level
  #
@@ -89,31 +89,31 @@ def applog(str, flags=APPLOGF_LEVEL_INFORMATIONAL):
             print(timeStampStr + str, file=gFileSessionLog)
         if gFileLifetimeLog:
             print(timeStampStr + str, file=gFileLifetimeLog)
- 
- 
+
+
  #
  # Logging wrapper functions for each level
  #
-def applog_i(s): 
+def applog_i(s):
     applog(s, APPLOGF_LEVEL_INFORMATIONAL)
-def applog_v(s): 
+def applog_v(s):
     applog(s, APPLOGF_LEVEL_VERBOSE)
-def applog_w(s): 
+def applog_w(s):
     applog(s, APPLOGF_LEVEL_WARNING)
-def applog_e(s): 
+def applog_e(s):
     applog(s, APPLOGF_LEVEL_ERROR)
-def applog_d(s):    
+def applog_d(s):
     applog(s, APPLOGF_LEVEL_DEBUG)
-    
+
 #
 # no-console equivalents
-#    
-def applog_i_nc(s): 
+#
+def applog_i_nc(s):
     applog(s, APPLOGF_LEVEL_INFORMATIONAL | APPLOGF_DONT_WRITE_TO_CONSOLE)
-def applog_d_nc(s):    
+def applog_d_nc(s):
     applog(s, APPLOGF_LEVEL_DEBUG | APPLOGF_DONT_WRITE_TO_CONSOLE)
-    
-    
+
+
 #
 # Logging check-enabled functions, used to avoid
 # performance penalty of generating log message
