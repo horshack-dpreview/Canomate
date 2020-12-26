@@ -34,7 +34,7 @@ running "python3 canomate.py"
 Enabling the Control API requires a one-time activation using Canon's
 CCAPI activation tool, which is distributed on Canon's developer
 website at https://developercommunity.usa.canon.com/canon?id=sdk_download.
-I've also included copies of the activation apps in the canomate repository.
+
 
 1. Connect the camera via USB to computer and run the CCAPI activation tool.
    Disconnect the camera from the computer when complete.
