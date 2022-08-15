@@ -6,7 +6,7 @@ http-based GET and POST/PUT commands.
 
 ## Online Manual
 
-http://www.testcams.com/canomate
+https://www.testcams.com/canomate
 
 ## Requirements
 
