@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>	
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Canomate - Automation tool for Canon cameras</title>
+<style type="text/css">
+body {
+	background-color: #F0F0F0;
+}
+pre {
+	display: inline;
+}
+ul {
+	margin:0;
+}
+h2 {
+	color: #000099;
+}
+td.InfoTable {
+	padding: 4px;
+	padding-left: 15px;
+}
+td.InfoTableHeader {
+	text-align: center;
+	font-weight: bold;
+}
+td.InfoTableCategory {
+	text-align: center;
+	font-weight: bold;
+	background-color: #C0C0C0
+}
+.programOutput {
+    margin-left: 2em;
+    font-weight: bold;
+}
+.scriptListing {
+    margin-left: 2em;
+    font-weight: bold;
+}
+
+</style>
+</head>
+
+<body>
+  <table width="80%" border="0" cellpadding="10">
+    <tr>
+      <td width="64" height="104"><img src="canomate_logo_64x64.png" alt="canomate logo" width="64" height="64"/></td>
+      <td width="1590"><h1 align="left">Canomate - Automation tool for Canon cameras</h1></td>
+    </tr>
+  </table>
+<p>This is the official homepage of Canomate, my open-source utility for automating operations on WiFi-equipped Canon cameras that support <a target="_blank" href="https://www.usa.canon.com/internet/portal/us/home/about/newsroom/press-releases/press-release-details/2019/20190107-sdk/20190107-sdk">Canon's Camera Control API (CCAPI)</a>. Canomate runs on Windows, Mac, Linux, and any other platform that has support for Python 3.5+. Canomate is licensed under GPL v3.</p>
+
+<h1 id="Requirements">Requirements</h1>
+<h2 id="CamerasSupported">Cameras Supported</h2>
+<p>As of 8/26/20 the following Canon cameras support CCAPI. Canon USA's list can be downloaded via <a target="_blank" href="https://developercommunity.usa.canon.com/sys_attachment.do?sys_id=7b8ad92bdb8e1410d1bb9a82ca9619ab&view=true">here</a>:</p>
+<ul>
+  <li>R5, R6, RP</li>
+  <li>1D X Mark III</li>
+  <li>M6 Mark II, M200</li>
+  <li>90D, Rebel T8i&nbsp;</li>
+  <li>PowerShot SX70 HS</li>
+  <li>PowerShot G5 X Mark II</li>
+  <li>PowerShot G7 X Mark III</li>
+</ul>
+<h2 id="SoftwareRequired">Software Required</h2>
+<ul>
+  <li>Any OS that supports Python 3.5 or later, including Windows, OSX/Mac, and Linux</li>
+  <li>Python 3.5 or later. I tested under 3.8.0 during development</li>
+  <li>Third-party <a target="_blank" href="https://requests.readthedocs.io/en/master/">requests module</a> for Python</li>
+</ul>
+<h1 id="OneTimeSetupInstructions">One-Time Setup Instructions</h1>
+  <h2 id="PhythonSetup">Installing Canomate</h2>
+  <ol>
+    <li>Download the source files by going to my <a target="_blank" href="https://github.com/horshack-dpreview/Canomate">Canomate GitHub repository</a>, click the green 'Code' button and then &quot;Download ZIP&quot;</li>
+    <li>Unzip the files to a directory on your local system. I recommend creating a canomate directory off your home directory</li>
+  </ol>
+  <h2>Python Setup</h2>
+  <ol>
+    <li>Canomate requires Python 3.5 or later. You can download the latest version from <a target="_blank" href="https://www.python.org/downloads/">here</a>. On OSX/Mac, Python 2.7x comes included but you'll need to install a 3.5 or later version of Python for Canomate to work. By default the Python 3 installer will place the python3 executable in /usr/local/bin</li>
+    <li>Canomate uses the third-party <a target="_blank" href="https://requests.readthedocs.io/en/master/">requests module</a> for its HTTP communication to the camera. You can install it with either &quot;pip install requests&quot; or with &quot;pip3 install requests&quot;.</li>
+  </ol>
+  <h2 id="CameraSetup">Camera Setup</h2>
+  <ol>
+    <li>Before you can enable CCAPI on your camera you must first perform a one-time activation of the feature using Canon's 
+      CCAPI activation tool, which is distributed on Canon's developer
+      website <a target="_blank" href="https://developercommunity.usa.canon.com/canon?id=sdk_download">here</a> - click &quot;Camera Control API (CCAPI)&quot; to see the download links for the activation tool.
+    Both Windows and Mac versions are provided. To gain access to the download links you'll need to register on Canon's site, which can be done for free <a target="_blank" href="https://developercommunity.usa.canon.com/canon?id=registration_landing">here</a>.</li>
+    <li>To activate your camera using Canon's activation app, connect the camera to your computer over USB and launch the app. It will send some MTP/PTP requests to the camera to activate its CCAPI support. It only takes a second to run.</li>
+    <li>Once CCAPI support has been activated you can enable the feature by going to &quot;Wireless communication settings&quot; in the camera's menu, select &quot;Wi-Fi
+settings&quot;, then scroll down to &quot;Camera Control API&quot;. You'll need to select the SSID and enter a password for
+your local wireless network if you haven't already done so for one of the camera's other wireless features. If your router supports WPS you can use it to complete the setup faster. You'll be prompted to use an Auto (DHCP) or static IP address for the camera - a static IP may make it easier to use
+this Canomate since you'll always know the camera's IP address rather than
+having to check the camera (although most routers will reuse the same IP
+address for a given MAC address).. At the last step of the process the
+camera will display a URL you can access; enter that URL into your computer's browser
+to finalize the setup and verify everything is working.</li>
+    <li>When done you'll also want to enable &quot;Auto connect&quot; in the same Camera
+Control API menu of the camera; that way the camera will automatically
+connect to your network and enable the CCAPI whenever you turn the camera
+on. You may need to temporarily disconnect from CCAPI in the camera menu in 
+order to turn &quot;Auto connect&quot; on.
+    </li>
+  </ol>
+  <h1 id="QuickStartGuide">Quick Start Guide</h1>
+  <h2>Launching Canomate</h2>
+  <p>Canomate can be started in one of the following ways:</p>
+  <ol>
+    <li>Type <strong>&quot;canomate.py&quot;</strong> for systems that have Python 3 configured as the default handler for .py files or systems which honor the &quot;!/usr/bin/env python3&quot; directive at the top of the file</li>
+    <li>Type <strong>&quot;python3 canomate.py&quot;</strong> for systems that have Python 2 configured as the default handler for .py files (Mac for example)</li>
+    <li>Type <strong>&quot;python canomate.py&quot;</strong> for systems where python involves Python 3 by default.  </li>
+  </ol>
+  <p>Canomate is a command-line tool. There are many options, both from the command line and within the automation script you create. Here is a guide on the bare essential options to get started.</p>
+  <h2 id="EssentialCommandLineOptions">Essential Command Line options</h2>
+  <p><strong>--ipaddress=&lt;addr&gt;</strong> - The IP address of the camera on your local WiFi network. You can get this address by going to the &quot;Wireless Communication settings&quot; in the camera's menu and going to &quot;Camera Control API&quot;, &quot;Wi-Fi settings&quot;, &quot;Camera Control API&quot;. The URL at the bottom of the screen includes the IP address of the camera</p>
+  <p><strong>--opfile=&lt;filename&gt;</strong> - The path/filename of the text file containing your automation script</p>
+  <h2 id="SimpleAutomationScripts">Simple Automation Scripts</h2>
+  <p>The automation script is a text file you create that lists all the automation operations to perform. Each line takes the form of &lt;Operation Name&gt; &lt;param=value&gt;. For example, here is a simple script that displays the model/serial # information from the camera, followed by the current P/A/S/M mode dial and exposure settings, and finally, the current still image quality settings:</p>
+<div class="scriptListing">  
+<pre>
+PrintCameraInfo
+PrintShootingSettings
+PrintStillImageQuality listavailable=yes
+</pre>
+</div>
+<p>Here is the output from the above script: </p>
+<div class="programOutput">
+<pre>
+canomate v0.01 - Automation Utility for Canon cameras (uses Canon Control API via WiFi)
+Copyright (c) Horshack, System Time: 08/26/20 12:38:00, Py: 3.8.0, OS: Windows
+
+PrintCameraInfo: Model: Canon EOS RP, S/N: XXXXXXXXXXXX, Firmware: 1.5.0
+PrintShootingSettings: Mode: m, Aperture: f8.0, SS: 1/250, ISO: 200, EC:
+PrintStillImageQuality: Raw: none, JPEG: small2 Available: Raw: ['none', 'raw', 'craw'], JPEG: ['none', 'large_fine', 'large_normal', 'medium_fine', 'medium_normal', 'small1_fine', 'small1_normal', 'small2']
+&gt;&gt;&gt;&gt; canomate session over (exit=0), logs at "C:\develop\canomate\canomate-appdata"
+</pre>
+</div>
+<p>After the program banner, each line of output corresponds to a single automation operation. Notice the &quot;listavailable=yes&quot; parameter for PrintStillImageQuality - this parameter is available for many of the PrintXXX operations and will display all the possible choices for the setting, along with the current setting on the camera. This is useful during the development of your script so you'll know how to specify a given setting. For example, let's say you want to change the JPEG shooting quality from it's current setting of 'small2' to a larger size. You would use the SetStillImageQuality operation, specifying the desired JPEG quality option from the available options displayed by PrintStillImageQuality.</p>
+<div class="scriptListing">
+    <pre>SetStillImageQuality rawquality=none jpegquality=large_normal</pre>
+</div>
+<p>Let's do something more useful - like taking a photo! Let's also set the specific exposure settings we want to use rather than relying on whatever the camera is currently set to. Here is the script:</p>
+<div class="scriptListing">
+<pre>
+AssertCameraSettings moviemode=off modedial=m 
+SetAperture aperture=f5.6
+SetShutterSpeed shutterspeed=1/200
+SetIso iso=400
+TakePhoto
+</pre>
+</div>
+<p>The first operation &quot;AssertCameraSettings&quot; tells Canomate to make sure the camera is in stills mode and the camera's mode dial is set to 'm' (Manual), which is necessary for the camera to accept all three of the exposure settings we want to set. If the camera were in another mode like 'av' (Aperture Priority) or 'tv' (Shutter Priority) then the camera wouldn't let us set the Shutter Speed and Aperture respectively since those are automatically calculated by the camera in those modes. Using &quot;AssertCameraSettings&quot; operations is good practice since it avoids having to decipher subsequent error messages if you attempt a setting or operation that is incompatible with the camera's current mode of operation. When Canomate encounters the &quot;AssertCameraSettings&quot; operation it retrieves the camera setting associated with each specified setting and verifies it matches the value specified, in this case making sure the camera's Mode Dial is set to 'm'. If the camera's mode dial is in any other position then Canomate will display a message and terminate the script. For example: </p>
+<div class="programOutput">
+    <pre>AssertCameraSettings: Mode dial setting is &quot;av&quot; but must be &quot;m&quot;</pre>
+</div>
+<p>The remaining operations are self-explanatory. The photo will be stored on the camera's internal media card, the same as if you took the photo holding the camera yourself. There are additional automation operations you can  use to retrieve information about the photo just taken and also an operation to download it. You can even configure an operation to launch an application of your choice to handle the downloaded photo, such as your favorite image viewer. All thisfunctionality isn't just limited to stills - you can also automate the taking of videos as well.</p>
+<h1 id="CommandLineReference">Automation Script Reference</h1>
+Detailed documentation for each of the operation's automation parameters is a bit sparse for now. See the <a href="https://github.com/horshack-dpreview/Canomate/blob/master/tests/RegressionTest_RP.txt" target="_blank">RegressionTest_RP.txt</a> file (and its output <a href="https://github.com/horshack-dpreview/Canomate/blob/master/tests/RegressionTest_RP_Result.txt" target="_blank">here</a>) for examples of each operation and its parameters in use.
+<h2>Overview</h2>
+<p>The automation script is a text file you create that lists all the automation operations to perform. Each line is in the form of &lt;Operation Name&gt; &lt;param=value&gt;. Operations can take zero, one, or more parameters, depending on the specific operation. Some parameters are <a href="#ParametersCommonToAllOperations">common to all operations.</a></p>
+<p>The value for each parameter can optionally be enclosed in double-quotes, unless the operation contains a space, in which case quotes are mandatory. Filenames are an example of parameters that should be quoted.</p>
+<p>If the same parameter is specified multiple times then the last parameter overrides the previous instances.</p>
+<p>You can include comments in your script by beginning the line with a # sign.</p>
+<h2>Groups</h2>
+<p>Automation operations can optionally be placed inside a Group operation. This makes it easy to repeat a given set of operations using the 'grouprepeatcount' parameter. The alternative would require copying and pasting the same set of operations multiple times. Each Group operation in the script must have a corresponding EndGroup.</p>
+<h3>Parameter Inheritance</h3>
+<p>There are up to four levels inheritance for parameters, listed as followed in lowest to highest priority: Defaults, Command Line, Group, and Operation. &quot;Command Line&quot; inheritance applies only to parameters that can be specified on both the command line and in the automation script, such as <a href="#cl_timeout">--timeout</a>.</p>
+<p>Parameters specified for a Group operation are inherited by all operations within the group. For example, 'retrycount' specified for a Group becomes the default retry count for each operation contained within the Group. That paramter can be overridden on a per-operation basis by supplying the 'retrycount' parameter for the operation. Parameters specific to Groups are not inherited by the operations within the group, or to nested groups . For example, the following script will execute each operation within the group 2 times for each iteration of the group, and perform 3 iterations of the group.</p>
+<div class="scriptListing">
+<pre>
+# Example of group vs operation repeat counts
+Group grouprepeatcount=3 repeatcount=2
+PrintMessageToLog message=&quot;Hello, world&quot;
+PrintMessageToLog message=&quot;Cruel, Cruel, world&quot;
+EndGroup
+</pre>
+</div>
+<p>Output:</p>
+<div class="programOutput">
+<pre>
+Performing group &quot;Example 1&quot;, Iteration 1/3
+PrintMessageToLog: Hello, world
+PrintMessageToLog: Hello, world
+PrintMessageToLog: Cruel, Cruel, world
+PrintMessageToLog: Cruel, Cruel, world
+Performing group &quot;Example 1&quot;, Iteration 2/3
+PrintMessageToLog: Hello, world
+PrintMessageToLog: Hello, world
+PrintMessageToLog: Cruel, Cruel, world
+PrintMessageToLog: Cruel, Cruel, world
+Performing group &quot;Example 1&quot;, Iteration 3/3
+PrintMessageToLog: Hello, world
+PrintMessageToLog: Hello, world
+PrintMessageToLog: Cruel, Cruel, world
+PrintMessageToLog: Cruel, Cruel, world
+</pre>
+</div>
+<h3>Group Nesting</h3>
+<p>Groups can be nested. Parameters specified on the outer group are inherited by operations contained inside nested group. Group-specific parameters are never inherited by either operations or nested groups. In the following example, group &quot;Inner&quot; does not inherit the 'grouprepeatcount' of &quot;Outer&quot;, but the operations within &quot;Inner&quot; do inherit the 'repeatcount' of &quot;Outer&quot;</p>
+<div class="scriptListing">
+<pre>Group groupname=&quot;Outer&quot; grouprepeatcount=2 repeatcount=3
+PrintMessageToLog message=&quot;I'm an outtie&quot;
+Group groupname=&quot;Inner&quot;
+PrintMessageToLog message=&quot;I'm an innie&quot;
+EndGroup
+EndGroup
+</pre>
+</div>
+<p>Output:</p>
+<div class="programOutput">
+<pre>Performing group &quot;Outer&quot;, Iteration 1/2
+PrintMessageToLog: I'm an outtie
+PrintMessageToLog: I'm an outtie
+PrintMessageToLog: I'm an outtie
+Performing group &quot;Innner&quot;, Iteration 1/1
+PrintMessageToLog: I'm an innie
+PrintMessageToLog: I'm an innie
+PrintMessageToLog: I'm an innie
+Performing group &quot;Outer&quot;, Iteration 2/2
+PrintMessageToLog: I'm an outtie
+PrintMessageToLog: I'm an outtie
+PrintMessageToLog: I'm an outtie
+Performing group &quot;Innner&quot;, Iteration 1/1
+PrintMessageToLog: I'm an innie
+PrintMessageToLog: I'm an innie
+PrintMessageToLog: I'm an innie
+</pre>
+</div>
+<h2>Operation Table</h2>
+<p>The following table lists all operations available and the parameters they accept. Parameters in <span class="requiredParam">red</span> are required. Parameters in black are optional</p>
+<table width="700" border="1" cellspacing="0" class="InfoTable">
+  <tr>
+    <td width="200" class="InfoTableHeader">Operation</td>
+    <td width="500" class="InfoTableHeader">Parameters</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="InfoTableCategory">Operation Containers</td>
+  </tr>
+  <tr>
+    <td align="center" >Group</td>
+    <td align="center">groupname, grouprepeatcount</td>
+  </tr>
+  <tr>
+    <td align="center" >EndGroup</td>
+    <td align="center">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="InfoTableCategory">Information</td>
+  </tr>
+  <tr>
+    <td>PrintCameraInfo</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>PrintCameraDateTime</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>PrintShootingSettings</td>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td>PrintShootingModeDial</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>PrintLensInfo</td>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td>PrintBatteryInfo</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>PrintTemperatureStatus</td>
+    <td>&nbsp;</td>
+  </tr> 
+  <tr>
+    <td colspan="2" class="InfoTableCategory">Exposure</td>
+  </tr>
+  <tr>
+    <td>PrintAperture</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetAperture</td>
+	<td><span class="requiredParam">aperture</span></td>
+  </tr>
+  <tr>
+    <td>PrintShutterSpeed</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetShutterSpeed</td>
+	<td><span class="requiredParam">shutterspeed</span></td>
+  </tr>
+  <tr>
+    <td>PrintIso</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetIso</td>
+	<td><span class="requiredParam">iso</span></td>
+  </tr>
+  <tr>
+    <td>PrintExposureCompensation</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetExposureCompensation</td>
+	<td><span class="requiredParam">exposurecompensation</span></td>
+  </tr>
+  <tr>
+    <td>PrintMeteringMode</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetMeteringMode</td>
+	<td><span class="requiredParam">meteringmode</span></td>
+  </tr>
+	
+  <tr>
+    <td colspan="2" class="InfoTableCategory">WB/Picture Controls</td>
+  </tr>
+  <tr>
+    <td>PrintWhiteBalance</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetWhiteBalance	</td>
+	<td><span class="requiredParam">whitebalance</span></td>
+  </tr>
+	
+
+  <tr>
+    <td colspan="2" class="InfoTableCategory">Stills Operation</td>
+  </tr>
+  <tr>
+    <td>TakePhoto</td>
+    <td>autofocus</td>
+  </tr>
+  <tr>
+    <td>PrintStillImageQuality</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetStillImageQuality</td>
+    <td><span class="requiredParam">rawquality</span>, <span class="requiredParam">jpegquality</span></td>
+  </tr>
+  <tr>
+    <td colspan="2" class="InfoTableCategory">Movie Operation</td>
+  </tr>
+  <tr>
+    <td>PrintMovieMode</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>EnterMovieMode</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>ExitMovieMode</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>PrintMovieQuality</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetMovieQuality</td>
+	<td><span class="requiredParam">moviequality</span></td>
+  </tr>
+  <tr>
+    <td>StartMovieRecord</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>StopMovieRecord</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="InfoTableCategory">AF/Drive Mode</td>
+  </tr>
+  <tr>
+    <td>PrintDriveMode</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetDriveMode</td>
+	<td><span class="requiredParam">drivemode</span></td>
+  </tr>
+  <tr>
+    <td>PrintAfOperation</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>PrintAfMethod</td>
+    <td>listavailable</td>
+  </tr>
+  <tr>
+    <td>SetAfMethod</td>
+	<td><span class="requiredParam">afmethod</span></td>
+  </tr>
+	
+  <tr>
+    <td colspan="2" class="InfoTableCategory">File Operations</td>
+  </tr>
+  <tr>
+    <td>WaitForNewFilesOnCamera</td>
+	<td><span class="requiredParam">maxwaittime</span></td>
+  </tr>
+  <tr>
+    <td>GetInfoOnNewFilesPolled</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>DownloadNewFilesPolled</td>
+    <td>outputdir, ifexists</td>
+  </tr>
+  <tr>
+    <td>DownloadFileByUrl</td>
+	<td><span class="requiredParam">url</span>, outputdir, ifexists</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="InfoTableCategory">Non-Camera Operations</td>
+  </tr>
+  <tr>
+    <td>RunExecutable</td>
+	  <td><p><span class="requiredParam">executable</span>, waitforcompletion, exitonlauncherr, appendlastdownloadstoargs, outputfile, writemode, assertexitcode. Arguments to executable specified on separate line via RunExecutableArgs</p></td>
+  </tr>
+  <tr>
+    <td>ExitApp</td>
+    <td>exitcode</td>
+  </tr>	
+  <tr>
+    <td>Delay</td>
+	<td><span class="requiredParam">delaytime</span></td>
+  </tr>
+  <tr>
+    <td>WaitForEnterKeyToContinue</td>
+    <td>beep</td>
+  </tr>
+  <tr>
+    <td>Beep</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>PrintMessageToLog</td>
+	<td><span class="requiredParam">message</span></td>
+  </tr>
+  <tr>
+    <td colspan="2" class="InfoTableCategory">Misc. / Utility</td>
+  </tr>
+  <tr>
+    <td>SyncDateTime</td>
+    <td>skewsecs</td>
+  </tr>
+  <tr>
+    <td>AssertCameraSettings</td>
+    <td>modedial, moviemode, afoperation</td>
+  </tr>	
+  <tr>
+    <td>GetPendingEvents</td>
+    <td>printevents</td>
+  </tr>
+  <tr>
+    <td>DisconnectWireless</td>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td>PrintAPI</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>GetInfoByUrl</td>
+	<td><span class="requiredParam">url</span></td>
+  </tr>	
+</table>	
+<h2 id="ParametersCommonToAllOperations">Parameters Common to All Operations</h2>
+<p>The following table lists parameters available to all operations. When specified on a Group  the parameters will be inherited by all operations the group contains - the children can still override their inherited parameters by specifying the parameter for the operation.</p>
+<table width="700" border="1" cellspacing="0" class="InfoTable">
+  <tr>
+    <td width="200" class="InfoTableHeader">Parameter</td>
+    <td width="500" class="InfoTableHeader">Description</td>
+  </tr>
+  <tr>
+    <td>repeatcount</td>
+    <td>Number of times operation is repeated before moving on to next operation. Default is 1</td>
+  </tr>
+  <tr>
+    <td>delayafter</td>
+    <td>Amount of time to delay after completing operation before the next operation is performed. Can be specified as a value in seconds or in hh:mm:ss or mm:ss form. Default is 0</td>
+  </tr>
+  <tr>
+    <td>timeout</td>
+    <td>Overrides <a href="#cl_timeout">--timeout</a> command line parameter for this operation.</td>
+  </tr>
+  <tr>
+    <td>downloadtimeout</td>
+    <td>Overrides -<a href="#cl_downloadtimeout">-downloadtimeout</a> command line parameter for this operation.</td>
+  </tr>
+  <tr>
+    <td>transportretries</td>
+    <td>Overrides -<a href="#cl_transportretries">-transportretries</a> command line parameter for this operation.</td>
+  </tr>
+  <tr>
+    <td>cmdretries</td>
+    <td>Overrides -<a href="#cl_cmdretries">-cmdretries</a> command line parameter for this operation.</td>
+  </tr>
+  <tr>
+    <td>retrydelay</td>
+    <td>Overrides -<a href="#cl_retrydelay">-retrydelay</a> command line parameter for this operation.</td>
+  </tr>
+  <tr>
+    <td>maxbusyretrytime</td>
+    <td>Overrides -<a href="#cl_maxbusyretrytime">-maxbusyretrytime</a> command line parameter for this operation.</td>
+  </tr>
+  <tr>
+    <td>exitoncmderr</td>
+    <td>Overrides -<a href="#cl_exitoncmderr">-exitoncmderr</a> command line parameter for this operation.</td>
+  </tr>
+	
+	</table>
+<h2>Operations Reference</h2>
+<p>&lt;To Do&gt;</p>
+<h1 id="CommandLineReference2">Command Line Reference</h1>
+<p>All argument names are case sensitive but the optional values for each argument are case-insensitive. For example &quot;--logginglevel&quot; must be under-case but the actual value specified can be any case.</p>
+<p>You can abbreviate any argument name by using just enough characters to uniquely distinguish it from other argument names. For example, --ip in place of --ipaddress.</p>
+<p><strong id="cl_help">--help</strong><br/>
+  Prints a help display listing all the typical options supported. You can also obtain help by invoking Canomate with no arguments</p>
+<p><strong id="cl_arg_file">!filename</strong><br/>
+  Load additional arguments from a text file. In addition to any parameter files you specify, Canomate will always load a file named 'canomate-defaultopts' from the same directory Canomate is in. The parameters from the default file will be loaded first, allowing you to override them with parameters from your own files and those specified on the command line. All parameter files must be formatted so that each parameter word is on a separate line, which is a requirement of Python's argparse routine. For example:</p>
+<pre>	--ipaddress
+	192.168.1.155
+	--opfile
+	takephotos.txt
+</pre>
+<p> <strong id="cl_ipaddress">--ipaddress</strong> address  (no default - required parameter)<br/>
+Specifies the IP address of the camera. You can get this address by going to the &quot;Wireless Communication settings&quot; in the camera's menu and going to &quot;Camera Control API&quot;, &quot;Wi-Fi settings&quot;, &quot;Camera Control API&quot;. The URL at the bottom of the screen includes the IP address of the camera</p>
+<p><strong id="cl_port">--port</strong> port (default = 8080)<br/>
+  The CCAPI port the camera is configured to. The default value is 8080, which is the default Canon uses. </p>
+<p><strong id="cl_opfile">--opfile</strong> &lt;filename&gt;<br/>
+  Path/filename of the automation script. Ops can alternatively be specified directly on the command line via <a href="#cl_op">--op</a>.</p>
+<p><strong id="cl_op">--op</strong> &lt;op | op | ...&gt;<br/>
+  As an alternative to using an automation script via -<a href="#cl_opfile">-optfile</a> you can enter operations directly on the command line. This is useful for simple operations. You can specify multiple operations by separating each with a | character. It's recommended to enclose the entire list in double quotes, for example: --op &quot;PrintCameraInfo | Delay time=5&quot;</p>
+<p><strong id="cl_outputdir">--outputdir &lt;</strong>directory&gt; (default = current directory)<br/>
+The directory to store downloaded images and movies. By default the current directory will be used. The directory specified with this option can be overridden on a per-automation op basis via outputdir=&lt;path&gt; parameter to the op.</p>
+<p><strong id="cl_ifexists">--ifexists</strong> [uniquename | skip | overwrite | prompt | exit] (default = uniquename)<br/>
+  Specifies what operation to take if a local file exists in the output directory matching a file to be downloaded. The default 'uniquename' will cause a unique filename to be generated by adding  -new-x suffix (for example, DSC_1575.cr3 becomes DSC_1575-new-1.cr3, DSC_1575-new-2.cr3, etc...). 'skip' will cause the file to be skipped and not downloaded. 'overwrite' will overwrite the local file with the downloaded file. 'prompt' will present a choice of operations to take on the console (uniquename/skip/overwrite/prompt/exit). 'exit' will cause the application to terminate whenever an existing file with the same name as a download candidate is found.</p>
+<p><strong id="cl_exitoncmderr">--exitoncmderr</strong> [yes | no] (default = yes)<br/>
+  Specifies whether the automation script is stopped whenever the Camera returns an error for an attempted operation. There are two broad types of errors in communication with the camera - transport and command. A transport error means the HTTP request failed to be delivered to the camera. The most common type of transport error is a Timeout, which can occur if the camera is turned off or has its CCAPI feature disabled. Transport errors are retried a user-configured number of times but if those retries are exhausted the script unconditionally terminates. In contrast, a command error occurs when the request was successfully delivered to the camera but the camera reported the request could not be completed. An example is attempting a StartMovieRecord when the camera is in stills mode or attempting to set the shutter speed while the camera is in Aperture-Priority mode. This option specifies whether the script is terminated if all the command error retries have been exhausted. This parameter can be override on a per-op basis in the automation script.</p>
+<p><strong id="cl_timeout">--timeout</strong> &lt;time value&gt; (default is 5)<br/>
+Specifies the timeout for all CCAPI requests to the camera except for downloads, which is specified via <a href="#cl_downloadtimeout">--downloadtimeout</a>. &lt;time value&gt; can be either a value in seconds or a time code in hh:mm:ss or mm:ss format. For example, 5:30 to set a timeout of 5 minutes and 30 seconds. This parameter can be override on a per-op basis in the automation script.</p>
+<p><strong id="cl_downloadtimeout">--downloadtimeout</strong> &lt;time value&gt; (default is 0, for no timeout)<br/>
+Specifies the timeout for CCAPI requests to the camera corresponding to the download of images or movie files. &lt;time value&gt; can be either a value in seconds or a time code in hh:mm:ss or mm:ss format. This parameter can be override on a per-op basis in the automation script.</p>
+<p><strong id="cl_transportretries">--transportretries</strong> &lt;retry count&gt; (default = 2)<br/>
+  Specifies the number of retries performed after a CCAPI transport error, such as a timeout. If all retries are exhausted the automation script will be terminated. This parameter can be override on a per-op basis in the automation script.</p>
+<p><strong id="cl_cmdretries">--cmdretries</strong> &lt;retry count&gt; (default = 2)<br/>
+  Specifies the number of retries performed after a CCAPI command error, which is an error that occurs when the camera successfully received a request but indicated it was invalid or could not be completed. If all retries are exhausted the automation script will be terminated based on the <a href="#cl_exitoncmderr">--exitoncmderr</a> setting. This parameter can be override on a per-op basis in the automation script.</p>
+<p><strong id="cl_retrydelay">--retrydelay</strong> &lt;time value&gt; (default = 0, no delay)<br/>
+Specifies the amount of time to delay before retrying a transport or command error. &lt;time value&gt; can be either a value in seconds or a time code in hh:mm:ss or mm:ss format. This parameter can be override on a per-op basis in the automation script. </p>
+<p><strong id="cl_maxbusyretrytime">--maxbusyretrytime</strong> &lt;time value&gt; (default = 10 seconds)<br/>
+Specifies the amount of time a request is retried that fails with a &quot;busy or &quot;preparing&quot; command error status from the camera, both of which indicate a temporary unavailability condition. This is a special case of command error handling that runs in parallel to the regular command error handling managed by <a href="#cl_cmdretries">--cmdretries</a>. The purpose is to allow the recovery of temporary busy conditions without having to increase the  normal command error retry counts. This parameter can be override on a per-op basis in the automation script. </p>
+<p><strong id="cl_logginglevel">--logginglevel</strong> [normal | verbose | debug] (default = normal)<br/>
+  The verbosity level of logging for an Canomate session. Canomate outputs its messages both to the console (stdout/stderr) and to a pair of logging files, named canomate-log-last.txt (log messages from most recent session) and canomate-log-lifetime.txt (log messages from all sessions). 'normal' indicates that only important/useful informational messages will be logged. 'verbose' includes some additional messages, useful for instance when you'd like more information about why a particular file was not downloaded. 'debug' will include all developer-level messages and debug information.</p>
+<h1 id="PlannedFeatures">Features Planned for Next Release</h1>
+<h3>Too many to list :)</h3>
+<h2 id="GPLv3License">GPL v3 License</h2>
+<pre>    Canomate - Automation for Canon Cameras 
+    Copyright (C) 2020, Horshack
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+</pre>
+<h2 id="Credits">
+  Credits</h2>
+<ul>
+  <li>Thanks to <a target="_blank" href="http://wingware.com" target="new">Wingware</a> for their support of the open-source community by providing free licenses to open-source developers. I use their product for debugging and highly recommend it</li>
+  <li>Logo from <a target="_blank" href='https://www.freepik.com/vectors/business'>Business vector created by rawpixel.com - www.freepik.com</a> </li>
+</ul>
+</body>
+</html>
