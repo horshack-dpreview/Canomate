@@ -1,3 +1,4 @@
+
 # canomate - Automation Utility for Canon cameras
 
 This uses Canon's Canon Control API (CCAPI), with is a REST API that canomate
@@ -6,7 +7,7 @@ http-based GET and POST/PUT commands.
 
 ## Online Manual
 
-http://www.testcams.com/canomate
+[https://horshack-dpreview.github.io/Canomate/](https://horshack-dpreview.github.io/Canomate/)
 
 ## Requirements
 
@@ -52,4 +53,4 @@ website at https://developercommunity.usa.canon.com/canon?id=sdk_download.
    Control API menu of the camera; that way the camera will automatically
    connect to your network and enable the CCAPI whenever you turn the camera
    on. You may need to temporarily disconnect from CCAPI in the camera in
-   order to turn "Auto connect" on.
+   order to turn "Auto connect" on.s
